@@ -1,0 +1,160 @@
+* {
+    margin: 0;
+    padding: 0;
+    font-family: "Poppins", sans-serif;
+    box-sizing: border-box;
+    position: relative;
+}
+
+body {
+    background-image: url(../img/imagem-banner.jpg);
+    background-position: center;
+    background-size: cover;
+    width: 100%;
+}
+
+main {
+    width: 80%;
+    height: auto;
+    margin: 50px auto 0;
+}
+.terms-use-section {
+    background-color: #fff;
+    padding: 50px 100px;
+    display: flex;
+    flex-direction: column;
+    text-align: justify;
+    border-radius: 10px;
+    box-shadow: 0px 5px 5px #000;
+    
+}
+
+p, ul {
+    padding-bottom: 15px;
+    font-size: 18px;
+}
+
+
+ul {
+    list-style: disc;
+}
+
+ol {
+    list-style: decimal;
+    font-size: 35px;
+}
+
+.bold {
+    font-weight: bold;
+}
+
+.subtitle-1 {
+    padding-bottom: 50px;
+    text-align: center;
+    font-family: "Poppins", sans-serif;
+    font-size: 40px;
+}
+
+.subtitle-2 {
+    padding-bottom: 15px;
+    font-family: "Poppins", sans-serif;
+    font-size: 30px;
+
+}
+
+a {
+    text-decoration: none;
+    color: rgb(9, 204, 100);
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+footer {
+    width: 100%; 
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 20px;
+    color:#fff;
+    text-shadow: 5px 5px 5px #000;
+    padding: 25px 0 0;
+}
+
+@media screen and (max-width: 1024px) {
+    main {
+        width: 90%; 
+        margin: 30px auto 0;
+    }
+
+    .terms-use-section {
+        padding: 40px 60px;
+    }
+
+    .subtitle-1 {
+        font-size: 35px;
+        padding-bottom: 40px;
+    }
+
+    .subtitle-2 {
+        font-size: 26px;
+    }
+
+    p, ul {
+        font-size: 17px;
+    }
+}
+
+@media screen and (max-width: 768px) {
+    main {
+        width: 95%; 
+        margin: 20px auto 0;
+    }
+
+    .terms-use-section {
+        padding: 25px 30px; 
+    }
+
+    .subtitle-1 {
+        font-size: 28px;
+        padding-bottom: 25px;
+    }
+    
+    .subtitle-2 {
+        font-size: 22px;
+    }
+    
+    p, ul {
+        font-size: 16px;
+    }
+
+    ol {
+        font-size: 25px;
+    }
+
+    footer {
+        font-size: 16px;
+        text-align: center;
+        padding: 20px 10px 10px;
+    }
+}
+
+@media screen and (max-width: 480px) {
+    .terms-use-section {
+        padding: 15px 15px; 
+    }
+
+    .subtitle-1 {
+        font-size: 24px;
+        padding-bottom: 15px;
+    }
+
+    .subtitle-2 {
+        font-size: 20px;
+    }
+
+    p, ul {
+        font-size: 15px;
+    }
+}

@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Meu Perfil - PsiCare</title>
+  <link rel="stylesheet" href="css-perfil/perfil.css">
+  <link rel="shortcut icon" href="img/icn.jpg" type="image/x-icon">
+</head>
+<body>
+  <div class="pagina">
+    <!--barra lateral-->
+    <aside class="barralateral">
+      <h2 class="logo">💚 PsiCare</h2>
+      <p class="subtitulo">Sua prática profissional</p>
+      <nav>
+        <ul>
+          <li>🏠 Início</li>
+          <li>📅 Agenda</li>
+          <li class="active">👤 Meu Perfil</li>
+        </ul>
+      </nav>
+    </aside>
+
+    <!--conteúdo principal-->
+    <main class="conteudo-perfil">
+      <header>
+        <div class="header-conteudo">
+          <h1>Meu Perfil</h1>
+          <div class="usuario">
+            <div class="avatar_usuario"></div>
+            <div class="menu_usuario">
+              <p>Meu Perfil</p>
+              <p>Sair</p>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <div class="container-perfil">
+        <!-- Foto de perfil -->
+        <div class="secao-perfil">
+          <div class="foto-perfil">
+            <div class="avatar-grande">
+              <span class="iniciais">PS</span>
+            </div>
+            <button class="botao-secundario" id="alterar-foto">
+              Alterar Foto
+            </button>
+          </div>
+        </div>
+
+        <!-- Informações pessoais -->
+        <div class="secao-perfil">
+          <h3>Informações Pessoais</h3>
+          <form class="form-perfil" id="form-perfil">
+            <div class="campo-grupo">
+              <label for="nome-completo">Nome Completo</label>
+              <input 
+                type="text" 
+                id="nome-completo" 
+                name="nome-completo"
+                value="Psicólogo Silva"
+                required
+              >
+            </div>
+
+            <div class="campo-grupo">
+              <label for="data-nascimento">Data de Nascimento</label>
+              <input 
+                type="text" 
+                id="data-nascimento" 
+                name="data-nascimento"
+                placeholder="dd/mm/aaaa"
+                value="15/05/1985"
+                required
+              >
+            </div>
+
+            <div class="campo-grupo">
+              <label for="email">E-mail</label>
+              <input 
+                type="email" 
+                id="email" 
+                name="email"
+                value="psicologo.silva@psicare.com"
+                required
+              >
+            </div>
+
+            <div class="campo-grupo">
+              <label for="telefone">Telefone</label>
+              <input 
+                type="tel" 
+                id="telefone" 
+                name="telefone"
+                value="(11) 99999-9999"
+              >
+            </div>
+
+            <div class="acoes-form">
+              <button type="button" class="botao-secundario" id="cancelar">
+                Cancelar
+              </button>
+              <button type="submit" class="botao-primario" id="salvar">
+                Salvar Alterações
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Alteração de senha -->
+        <div class="secao-perfil">
+          <h3>Alteração de Senha</h3>
+          <form class="form-senha" id="form-senha">
+            <div class="campo-grupo">
+              <label for="senha-atual">Senha Atual</label>
+              <input 
+                type="password" 
+                id="senha-atual" 
+                name="senha-atual"
+                placeholder="Digite sua senha atual"
+              >
+            </div>
+
+            <div class="campo-grupo">
+              <label for="nova-senha">Nova Senha</label>
+              <input 
+                type="password" 
+                id="nova-senha" 
+                name="nova-senha"
+                placeholder="Digite a nova senha"
+              >
+            </div>
+
+            <div class="campo-grupo">
+              <label for="confirmar-senha">Confirmar Nova Senha</label>
+              <input 
+                type="password" 
+                id="confirmar-senha" 
+                name="confirmar-senha"
+                placeholder="Confirme a nova senha"
+              >
+            </div>
+
+            <div class="acoes-form">
+              <button type="submit" class="botao-primario" id="alterar-senha">
+                Alterar Senha
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Modal de confirmação -->
+  <div class="modal" id="modal-confirmacao">
+    <div class="modal-conteudo">
+      <h3>Alterações Salvas!</h3>
+      <p>Suas informações foram atualizadas com sucesso.</p>
+      <button class="botao-primario" id="fechar-modal">OK</button>
+    </div>
+  </div>
+
+  <script src="script-perfil/perfil.js"></script>
+</body>
+</html>

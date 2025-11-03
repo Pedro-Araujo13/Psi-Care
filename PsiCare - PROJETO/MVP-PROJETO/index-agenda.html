@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PsiCare - Agenda</title>
+    <link rel="stylesheet" href="css-agenda/agenda.css">
+    <link rel="shortcut icon" href="img/icn.jpg" type="image/x-icon">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="pagina">
+    <aside class="barralateral">
+      <h2 class="logo">💚 PsiCare</h2>
+      <p class="subtitulo">Sua prática profissional</p>
+      <nav>
+        <ul>
+          <li>🏠 Início</li>
+          <li class="ativo">📅 Agenda</li>
+        </ul>
+      </nav>
+    </aside>
+
+    <main class="bemvindo">
+      <header>
+        <div class="conteudo-cabecalho">
+          <h1>Agenda</h1>
+          <div class="usuario">
+            <div class="avatar_usuario"></div>
+            <div class="menu_usuario">
+              <p>Meu Perfil</p>
+              <p>Sair</p>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <div class="botao">
+        <button id="abrir-modal" class="abrir-modal">Nova Sessão</button>
+      </div>
+      
+      <div id="modal-agendamento" class="modal">
+        <div class="bloco">
+          <span class="fechar-modal" onclick="fecharModalAgendamento()">&times;</span>
+          <h2>Agendamento</h2>
+          
+          <div class="selecao-paciente">
+            <div class="busca-paciente">
+              <input type="text" id="buscar-paciente" placeholder="Buscar paciente...">
+              <button type="button" onclick="limparBusca()">✕</button>
+            </div>
+            <div class="lista-pacientes-modal" id="lista-pacientes-modal">
+            </div>
+            <div class="opcao-novo-paciente">
+              <button type="button" onclick="cadastrarNovoPaciente()" class="botao-novo-paciente">
+                + Cadastrar Novo Paciente
+              </button>
+            </div>
+          </div>
+
+          <input type="date" id="data">
+          <input type="time" id="hora">
+          <button onclick="agendar()">Agendar</button>
+        </div>
+      </div>
+
+      <div id="modal-agendamentos-dia" class="modal">
+        <div class="bloco bloco-agendamentos">
+          <span class="fechar-modal" onclick="fecharModalAgendamentosDia()">&times;</span>
+          <h2 id="titulo-agendamentos-dia">Agendamentos do Dia</h2>
+          <div class="lista-agendamentos-dia" id="lista-agendamentos-dia">
+          </div>
+          <div class="acoes-agendamentos">
+            <button onclick="fecharModalAgendamentosDia()" class="botao-fechar">Fechar</button>
+            <button onclick="novoAgendamentoParaData()" class="botao-novo">Novo Agendamento</button>
+          </div>
+        </div>
+      </div>
+      
+      <div id="container-calendario">
+        <div class="cabecalho-calendario">
+          <button id="botao-anterior">&lt;</button>
+          <h2 id="mes-ano"> Mês Ano</h2>
+          <button id="botao-proximo">&gt;</button>
+        </div>
+        <div class="dias-semana">
+          <span>Dom</span><span>Seg</span><span>Ter</span><span>Qua</span><span>Qui</span><span>Sex</span><span>Sab</span>
+        </div>
+        <div class="dias-mes" id="dias-mes"></div>
+      </div>
+    </main>
+  </div>
+
+  <script src="script-agenda/agenda.js"></script>
+</body>  
+</html>

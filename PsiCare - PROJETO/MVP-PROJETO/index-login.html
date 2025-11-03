@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PsiCare</title>
+    <link rel="stylesheet" href="css-login/style.css">
+    <link rel="shortcut icon" href="img/icn.jpg" type="image/x-icon">
+</head>
+<body>
+    <main>
+        <section id="login" class="login">
+            <div class="login-area">
+                <a href="#">
+                    <h1>💚PsiCare</h1>
+                </a>
+                <form action="index-inicio.html">
+                    <div class="email">
+                        <input type="email" name="email" placeholder="Seu@gmail.com" minlength="5" maxlength="30" required>
+                    </div>
+                    <div class="senha">
+                        <input type="password" name="password" id="password" placeholder="Digite sua senha" minlength="5" maxlength="15" required autocomplete="current-password">
+                    </div>
+                    <div class="mostrar-password">
+                        <input id="mostrar" type="checkbox" name="checkbox-mostrar-password">
+                        <label for="checkbox-mostrar-password">Mostrar senha</label>
+                    </div>
+                    <div class="button-entrar">
+                        <input type="submit" value="Entrar">
+                    </div>
+                </form>
+                <div class="password-reset">
+                    <a href="index-password-reset.html">Esqueceu a senha?   </a>
+                </div>
+                <div class="barra">
+                    <div class="container-barra"><hr></div>
+                    <div class="text-barra">
+                        <p>OU</p>
+                    </div>
+                    <div class="container-barra"><hr></div>
+                </div>
+                <div class="cadastro">
+                    <p>Não tem uma conta? <a href="index-register.html">Cadastre-se</a></p>
+                </div>
+            </div>
+        </section>
+    </main>
+    <footer>
+        <p class="rodape">&copy; Copyright PsiApp - 2025. Todos os direitos reservados.</p>
+    </footer>
+</body>
+<script src="script-login/login.js"></script>
+</html>

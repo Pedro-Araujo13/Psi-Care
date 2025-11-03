@@ -1,0 +1,175 @@
+* {
+    margin: 0;
+    padding: 0;
+    font-family: "Poppins", sans-serif;
+}
+
+body {
+    background-image: url(../img/imagem-banner.jpg);
+    background-position: center;
+    background-size: cover;
+    max-width: 100%;
+    min-height: 100vh; 
+    margin: 0;
+    position: relative;
+    overflow-y: hidden;
+    overflow-x: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.register-container {
+    width: 400px;
+    min-height: auto;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.5);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.title {
+    text-align: center;
+    padding: 15px 0 0;
+    font-size: 40px;
+    font-family: "Poppins", sans-serif;
+}
+
+.title-a {
+    text-decoration: none;
+    color: #2ca77a;
+}
+
+.subtitle {
+    width: 60%;
+    text-align: center;
+    font-weight: bold;
+    padding-bottom: 10px;
+    font-size: 15px;
+    font-family: "Poppins", sans-serif;
+    opacity: 0.7;
+}
+
+.formulair {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.full-name {
+    width: 60%;
+    height: 20px;
+    padding: 10px 20px;
+    font-size: 15px;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    margin-bottom: 10px;
+}
+
+.date-of-birth {
+    align-self: flex-start;
+    font-family: "Poppins", sans-serif;
+    font-size: 15px;
+    font-weight: 500;
+    opacity: 0.7;
+    padding-left: 50px;
+}
+
+.date-of-birth-select {
+    width: 60%;
+    height: 20px;
+    padding: 10px 20px;
+    font-size: 15px;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    margin-bottom: 10px;
+    opacity: 0.7;
+}
+.email {
+    width: 60%;
+    height: 20px;
+    padding: 10px 20px;
+    font-size: 15px;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+}
+
+.password {
+    width: 60%;
+    height: 20px;
+    padding: 10px 20px;
+    font-size: 15px;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    margin-top: 10px;
+}
+
+.terms-of-use-container {
+    margin: 15px 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 5px;
+}
+
+.terms-of-use, .terms-of-use a {
+    font-family: "Poppins", sans-serif;
+    font-size: 10px;
+    font-weight: bold;
+    text-decoration: none;
+}
+
+.terms-of-use a {
+    color: rgb(9, 204, 100);
+}
+
+.terms-of-use a:hover {
+    text-decoration: underline;
+}
+
+
+.button-create {
+    width: 200px;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 10px;
+    background-color: rgb(9, 204, 100, 0.8);
+    font-size: 15px;
+    color: #fff;
+    cursor: pointer;
+    transition: 0.5s;
+    margin-bottom: 15px;
+}
+
+/* .button-create:hover {
+    background-color: rgb(9, 204, 100);
+} */
+
+
+/* 1. ESTADO DESABILITADO (quando disabled=true) */
+.button-create:disabled {
+    background-color: rgba(9, 204, 100, 0.4);
+    cursor: auto;
+}
+
+/* 2. ESTADO HABILITADO E COM HOVER (quando disabled=false) */
+/* O seletor :not(:disabled) garante que o hover só funcione se o botão NÃO estiver desabilitado */
+.button-create:not(:disabled):hover {
+    background-color: rgb(9, 204, 100); /* Um verde um pouco mais escuro para o efeito hover */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Sombra para dar um efeito de "subida" */
+}
+
+footer {
+    position: absolute; 
+    bottom: 5px; 
+    width: 100%; 
+    text-align: center;
+    font-size: 20px;
+    color:#fff;
+    text-shadow: 5px 5px 5px #000;
+}
+

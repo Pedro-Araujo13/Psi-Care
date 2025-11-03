@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PsiCare - Início</title>
+  <link rel="stylesheet" href="css-inicio/inicio.css">
+  <link rel="shortcut icon" href="img/icn.jpg" type="image/x-icon">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+</head>
+<body>
+  <div class="pagina">
+    <aside class="barralateral">
+      <h2 class="logo">💚 PsiCare</h2>
+      <p class="subtitulo">Sua prática profissional</p>
+      <nav>
+        <ul>
+          <li class="ativo">🏠 Início</li>
+          <li>📅 Agenda</li>
+        </ul>
+      </nav>
+    </aside>
+
+    <main class="bemvindo">
+      <header>
+        <div class="conteudo-cabecalho">
+          <h1>Início</h1>
+          <div class="usuario">
+            <div class="avatar_usuario"></div>
+            <div class="menu_usuario">
+              <p>Meu Perfil</p>
+              <p>Sair</p>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <section class="cards">
+        <div class="card">
+          <p>Pacientes Ativos</p>
+          <h2 id="pacientes_ativos">--</h2>
+        </div>
+        <div class="card">
+          <p>Sessões Hoje</p>
+          <h2 id="sessoes_hoje">--</h2>
+        </div>
+        <div class="card">
+          <p>Esta Semana</p>
+          <h2 id="sessoes_semana">--</h2>
+        </div>
+      </section>
+
+      <section class="pacientes">
+        <div class="gerenciar_pacientes">
+          <h3>Gerenciar Pacientes</h3>
+          <button class="botao" id="adicionar_paciente">+ Novo Paciente</button>
+        </div>
+
+        <div class="pesquisa-paciente">
+          <input type="text" id="pesquisa-paciente" placeholder="Buscar pacientes...">
+          <select id="filtro-status">
+            <option value="todos">Todos os status</option>
+            <option value="ativo">Ativo</option>
+            <option value="pausa">Em pausa</option>
+            <option value="inativo">Inativo</option>
+          </select>
+        </div>
+
+        <ul class="lista-pacientes" id="lista-pacientes">
+        </ul>
+      </section>
+    </main>
+  </div>
+
+  <div id="modal" class="fundo-modal" style="display:none;">
+    <div class="modal">
+      <h2 id="titulo-modal">Novo Paciente</h2>
+      <form id="formulario-paciente">
+        <input type="hidden" id="id-paciente">
+        
+        <div class="grupo-formulario">
+          <label for="nome">Nome Completo</label>
+          <input type="text" id="nome" required>
+        </div>
+        
+        <div class="grupo-formulario">
+          <label for="data-nascimento">Data de Nascimento</label>
+          <input type="text" id="data-nascimento" placeholder="dd/mm/aaaa" class="seletor-data">
+        </div>
+        
+        <div class="grupo-formulario">
+          <label for="telefone">Telefone</label>
+          <input type="text" id="telefone" placeholder="(11) 99999-9999">
+        </div>
+        
+        <div class="grupo-formulario">
+          <label for="queixa-principal">Queixa Principal</label>
+          <textarea id="queixa-principal" placeholder="Descreva o motivo principal da busca por atendimento..." rows="3"></textarea>
+        </div>
+        
+        <div class="grupo-formulario">
+          <label for="historico-familiar">Histórico Familiar</label>
+          <textarea id="historico-familiar" placeholder="Histórico de saúde mental na família, se relevante..." rows="3"></textarea>
+        </div>
+        
+        <div class="grupo-formulario">
+          <label for="observacoes-iniciais">Observações Iniciais</label>
+          <textarea id="observacoes-iniciais" rows="3"></textarea>
+        </div>
+
+        <div class="secao-agendamento">
+          <h3>Agendamento de Sessões</h3>
+          
+          <div class="grupo-formulario">
+            <label for="data-sessao">Data da Próxima Sessão</label>
+            <input type="text" id="data-sessao" placeholder="Selecione a data" class="seletor-data">
+          </div>
+          
+          <div class="grupo-formulario">
+            <label for="horario-sessao">Horário da Sessão</label>
+            <input type="text" id="horario-sessao" placeholder="Selecione o horário" class="seletor-horario">
+          </div>
+          
+          <div class="grupo-formulario">
+            <label for="frequencia-sessao">Frequência das Sessões</label>
+            <select id="frequencia-sessao">
+              <option value="">Selecione a frequência</option>
+              <option value="semanal">Semanal</option>
+              <option value="quinzenal">Quinzenal</option>
+              <option value="mensal">Mensal</option>
+              <option value="avulso">Avulso</option>
+            </select>
+          </div>
+        </div>
+        
+        <div class="grupo-formulario">
+          <label for="email">Email</label>
+          <input type="email" id="email">
+        </div>
+        
+        <div class="grupo-formulario">
+          <label for="status">Status</label>
+          <select id="status">
+            <option value="ativo">Ativo</option>
+            <option value="pausa">Em pausa</option>
+            <option value="inativo">Inativo</option>
+          </select>
+        </div>
+        
+        <div class="grupo-formulario">
+          <label for="anotacoes">Anotações</label>
+          <textarea id="anotacoes" rows="3"></textarea>
+        </div>
+
+        <div class="acoes">
+          <button type="button" id="cancelar">Cancelar</button>
+          <button type="submit" class="primario">Salvar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div id="modal-anotacoes" class="fundo-modal" style="display: none;">
+    <div class="modal">
+      <h2>Anotações do Paciente</h2>
+      <div id="conteudo-anotacoes"></div>
+      <div class="acoes">
+        <button id="fechar-anotacoes" class="primario">Fechar Anotações</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="modal-paciente" class="fundo-modal" style="display: none;">
+    <div class="modal modal-paciente">
+      <div class="cabecalho-modal-paciente">
+        <h2 id="titulo-modal-paciente">Paciente</h2>
+        <span class="fechar-modal" onclick="fecharModalPaciente()">&times;</span>
+      </div>
+      
+      <div class="conteudo-paciente">
+        <div class="info-principal-paciente">
+          <h3 id="nome-paciente-modal">Nome do Paciente</h3>
+          <p id="horario-paciente-modal">Horário das sessões</p>
+        </div>
+        
+        <div class="secao-paciente">
+          <h4>Informações Pessoais</h4>
+          <div class="info-item">
+            <span class="info-label">Telefone</span>
+            <span id="telefone-paciente-modal" class="info-value">(11) 99999-9999</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Data de Nascimento</span>
+            <span id="nascimento-paciente-modal" class="info-value">15/03/1985</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Status</span>
+            <select id="status-paciente-modal" class="seletor-status">
+              <option value="ativo">Ativo</option>
+              <option value="pausa">Em pausa</option>
+              <option value="inativo">Inativo</option>
+            </select>
+          </div>
+        </div>
+        
+        <div class="secao-paciente">
+          <h4>Histórico</h4>
+          <div class="info-item">
+            <span class="info-label">Total de sessões</span>
+            <span id="total-sessoes-modal" class="info-value">12 sessões</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Última sessão</span>
+            <span id="ultima-sessao-modal" class="info-value">15/01/2024</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Próxima sessão</span>
+            <span id="proxima-sessao-modal" class="info-value">23/01/2024</span>
+          </div>
+        </div>
+        
+        <div class="secao-paciente">
+          <h4>Anotações de Sessão</h4>
+          <div id="lista-anotacoes-sessao">
+          </div>
+        </div>
+        
+        <div class="acoes-paciente">
+          <button class="botao-nova-anotacao" onclick="abrirModalNovaAnotacao()">+ Nova Anotação</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="modal-nova-anotacao" class="fundo-modal" style="display: none;">
+    <div class="modal">
+      <div class="cabecalho-modal-paciente">
+        <h2>Nova Anotação de Sessão</h2>
+        <span class="fechar-modal" onclick="fecharModalNovaAnotacao()">&times;</span>
+      </div>
+      
+      <form id="formulario-anotacao">
+        <input type="hidden" id="id-paciente-anotacao">
+        
+        <div class="grupo-formulario">
+          <label for="data-sessao-anotacao">Data da Sessão</label>
+          <input type="text" id="data-sessao-anotacao" placeholder="dd/mm/aaaa" class="seletor-data">
+        </div>
+        
+        <div class="grupo-formulario">
+          <label>Comparecimento</label>
+          <div class="botoes-comparecimento">
+            <button type="button" class="botao-comparecimento ativo" data-compareceu="true">Compareceu</button>
+            <button type="button" class="botao-comparecimento" data-compareceu="false">Não Compareceu</button>
+          </div>
+        </div>
+        
+        <div class="grupo-formulario">
+          <label for="observacoes-sessao">Observações da Sessão</label>
+          <textarea id="observacoes-sessao" placeholder="Descreva o que aconteceu durante a sessão..." rows="4"></textarea>
+        </div>
+        
+        <div class="grupo-formulario">
+          <label for="humor-sessao">Humor/Estado Emocional</label>
+          <textarea id="humor-sessao" placeholder="Como o paciente se apresentou emocionalmente..." rows="3"></textarea>
+        </div>
+        
+        <div class="grupo-formulario">
+          <label for="proximos-passos-sessao">Próximos Passos</label>
+          <textarea id="proximos-passos-sessao" placeholder="Planos para as próximas sessões..." rows="3"></textarea>
+        </div>
+        
+        <div class="acoes">
+          <button type="button" onclick="fecharModalNovaAnotacao()">Cancelar</button>
+          <button type="submit" class="primario">Salvar Anotação</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/pt.js"></script>
+  <script src="script-inicio/inicio.js"></script>
+</body>
+</html>

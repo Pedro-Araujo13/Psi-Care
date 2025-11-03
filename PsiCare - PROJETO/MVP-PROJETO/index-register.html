@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PsiCare</title>
+    <link rel="stylesheet" href="css-register/style.css">
+    <link rel="shortcut icon" href="img/icn.jpg" type="image/x-icon">
+</head>
+<body>
+    <main>
+        <section id="register" class="register-section">
+            <div class="register-container">
+                <a href="index-login.html" class="title-a">
+                    <h1 class="title">💚PsiCare</h1>
+                </a>
+                <h2 class="subtitle">Crie sua conta</h2>
+                <form action="#" class="formulair">
+                    <input type="text" name="full-name" class="full-name" placeholder="Nome completo" required>
+                    <label for="date-of-birth" class="date-of-birth">Data de nascimento</label>
+                    <input type="date" name="date-of-birth" min="1900-01-01" max="2026-12-31" id="date-of-birth" class="date-of-birth-select" placeholder="Data de nascimento" required>
+                    <input type="email" name="email" id="email-input" class="email" placeholder="Seu@gmail.com" required>
+                    <p id="email-error-message" style="color: red; display: none; margin-top: 5px; font-size: 12px;">Por favor, insira um endereço de e-mail válido.</p>
+                    <input type="password" name="password" id="password-one" class="password" minlength="1" maxlength="15" placeholder="Digite sua senha" required>
+                    <input type="password" name="password" id="password-two" class="password" minlength="1" maxlength="15" placeholder="Digite sua senha novamente" required>
+                    <p id="password-error-message" style="color: red; display: none; margin-top: 5px; font-size: 12px;">Atenção: As senhas digitadas não coincidem.</p>
+                    <div class="terms-of-use-container">
+                        <input type="checkbox" name="terms-of-use" class="checkbox" required>
+                        <label for="terms-of-use" class="terms-of-use">Li e aceito os <a href="index-terms-use.html" target="_blank">Termos de uso</a> e a <a href="index-plt-private.html" target="_blank">Política de privacidade</a> do PsiCare.</label>
+                    </div>
+                    <input type="submit" class="button-create" value="Criar Conta" disabled>
+                </form>
+        </div>
+        </section>
+    </main>
+    <footer>
+        <p class="rodape">&copy; Copyright PsiApp - 2025. Todos os direitos reservados.</p>
+    </footer>
+</body>
+<script src="script-register/register.js"></script>
+</html>

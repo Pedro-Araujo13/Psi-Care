@@ -1,0 +1,176 @@
+* {
+    margin: 0;
+    padding: 0;
+    font-family: "Poppins", sans-serif;
+}
+
+body {
+    background-image: url(../img/imagem-banner.jpg);
+    background-position: center;
+    background-size: cover;
+    max-width: 100%;
+    min-height: 100vh;
+    margin: 0;
+    position: relative;
+    overflow-y: hidden;
+    overflow-x: hidden;
+}
+
+#login {
+    width: 100%;
+    height: 100vh; 
+    display: flex;
+    justify-content: center; 
+    align-items: center;
+}
+
+.login-area {
+    width: 500px;
+    min-height: auto;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.5);
+}
+
+.login-area h1 {
+    text-align: center;
+    padding: 25px;
+    font-size: 60px;
+    font-family: "Poppins", sans-serif;
+}
+
+a {
+    text-decoration: none;
+    color: #2ca77a;
+}
+
+.email {
+    text-align: center;
+}
+
+.email input {
+    width: 60%;
+    height: 30px;
+    padding: 10px 20px;
+    font-size: 20px;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    margin-bottom: 25px;
+}
+
+.senha {
+    text-align: center;
+}
+
+.senha input {
+    width: 60%;
+    height: 30px;
+    padding: 10px 20px;
+    font-size: 20px;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    margin-bottom: 5px;
+}
+
+.mostrar-password {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 5px;
+    width: 67%;
+    margin: 0 auto 25px;
+}
+
+.button-entrar {
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+.button-entrar input {
+    width: 200px;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 10px;
+    background-color: rgb(9, 204, 100, 0.7);
+    font-size: 20px;
+    color: #fff;
+    cursor: pointer;
+    transition: 0.5s;
+}
+
+.button-entrar input:hover {
+    background-color: rgb(9, 204, 100);
+}
+
+.password-reset{
+    text-align: center;
+}
+
+.password-reset a {
+    text-decoration: none;
+    color: #000;
+}
+
+.password-reset a:hover {
+    text-decoration: underline;
+}
+
+.barra {
+    display: flex;
+    width: 218px;
+    margin: 15px auto;
+
+}
+
+.container-barra {
+    position: relative;
+    width: 200px;
+    top: 9px
+}
+
+.text-barra {
+    padding: 0 10px;
+}
+
+.cadastro {
+    text-align: center;
+    font-size: 17px;
+    margin-bottom: 25px;
+}
+
+.cadastro a {
+    color: rgb(9, 204, 100);
+    font-weight: bold;
+}
+
+footer {
+    position: absolute; 
+    bottom: 5px; 
+    width: 100%; 
+    text-align: center;
+    font-size: 20px;
+    color:#fff;
+    text-shadow: 5px 5px 5px #000;
+}
+
+@media (max-width: 390px) {
+    .login-area {
+        width: 300px;
+        display: flex;
+        flex-direction: column;
+    }
+    .login-area h1 {
+        font-size: 50px;
+    }
+}
+
+@media (max-width: 430px) {
+    .login-area {
+        width: 350px;
+        display: flex;
+        flex-direction: column;
+    }
+    .login-area h1 {
+        font-size: 50px;
+    }
+}
