@@ -313,7 +313,30 @@ function abrirModalPaciente(pacienteId) {
 
     modalPaciente.style.display = "flex";
 }
+function inicializarMascaraTelefone() {
+    const inputTelefoneCadastro = document.getElementById('telefone'); // Este é o input do formulário de edição
 
+    if (inputTelefoneCadastro) {
+        inputTelefoneCadastro.addEventListener('input', (evento) => {
+            let valor = evento.target.value;
+
+            // 1. Remove tudo que não for número
+            valor = valor.replace(/\D/g, "");
+
+            // 2. Coloca os parênteses em volta dos dois primeiros dígitos (DDD)
+            valor = valor.replace(/^(\d{2})(\d)/, "($1) $2");
+
+            // 3. Coloca o ponto depois do primeiro dígito do número (o nono dígito)
+            valor = valor.replace(/(\d)(\d{4})/, "$1.$2");
+
+            // 4. Coloca o hífen antes dos últimos 4 dígitos
+            valor = valor.replace(/(\d{4})(\d)/, "$1-$2");
+
+            // Atualiza o valor do input
+            evento.target.value = valor;
+        });
+    }
+}
 function atualizarStatusPaciente() {
     if (!pacienteSelecionado) return;
     
@@ -657,6 +680,7 @@ function inicializar() {
     }
     
     inicializarSeletoresData();
+    inicializarMascaraTelefone();
     gerenciadorUsuario.atualizarAvatarCabecalho();
     salvarArmazenamento();
     renderizarPacientes(pacientes);
