@@ -268,6 +268,10 @@ function abrirModalPaciente(pacienteId) {
     document.getElementById('telefone-paciente-modal').textContent = paciente.telefone || '-';
     document.getElementById('nascimento-paciente-modal').textContent = paciente.dataNascimento || '-';
     
+    document.getElementById('queixa-paciente-modal').textContent = paciente.queixaPrincipal || 'Não informado';
+    document.getElementById('historico-paciente-modal').textContent = paciente.historicoFamiliar || 'Não informado';
+    document.getElementById('observacoes-paciente-modal').textContent = paciente.observacoesIniciais || 'Não informado';
+
     const statusElement = document.getElementById('status-paciente-modal');
     statusElement.value = paciente.status;
 

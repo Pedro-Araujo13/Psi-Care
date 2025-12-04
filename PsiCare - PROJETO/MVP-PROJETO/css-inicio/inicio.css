@@ -709,3 +709,24 @@ select {
     flex-direction: column;
   }
 }
+/* Estilo para campos de texto longo no modal de visualização */
+.info-item-bloco {
+  padding: 12px 0;
+  border-bottom: 1px solid #f0f0f0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.info-item-bloco .info-label {
+  font-weight: 600;
+  color: #2ca77a; /* Usando a cor tema para destacar o título */
+  font-size: 13px;
+}
+
+.info-item-bloco .info-value-texto {
+  color: #555;
+  font-size: 14px;
+  line-height: 1.5;
+  white-space: pre-wrap; /* Mantém as quebras de linha que o usuário digitou */
+}
