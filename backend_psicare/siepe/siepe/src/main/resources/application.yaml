@@ -1,0 +1,46 @@
+server:
+  port: 8087  # Porta onde sua aplicação vai rodar
+  servlet:
+    context-path: '/siepe/'  # Caminho base para todos os endpoints da API
+
+
+spring:
+  datasource:
+    # URL CORRETA DO MYSQL:
+    # Porta padrão -> 3306
+    # Banco -> livraria
+    # Parâmetros recomendados:
+    # - useSSL=false → evita warning
+    # - allowPublicKeyRetrieval=true → necessário em algumas instalações do MySQL
+    # - serverTimezone=UTC → evita problemas de timezone
+    url: jdbc:mysql://localhost:3307/siepe?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+
+    username: root  # Usuário do banco
+    password: MySQL  # Senha do banco
+    driver-class-name: com.mysql.cj.jdbc.Driver  # Driver JDBC do MySQL
+
+    hikari:
+      maximum-pool-size: 10  # Número máximo de conexões simultâneas
+
+  jpa:
+    open-in-view: false  # Evita LazyInitializationException e melhora a performance
+
+    hibernate:
+      ddl-auto: update  # Atualiza automaticamente o schema sem apagar dados
+      dialect: org.hibernate.dialect.MySQL8Dialect  # Dialeto correto do MySQL 8
+
+    properties:
+      hibernate:
+        show_sql: true   # Mostra SQL no console
+        format_sql: true # Formata o SQL para melhorar a leitura
+        jdbc:
+          lob.non_contextual_creation: true  # Evita erros com campos LOB
+  # Exibição de logs coloridos no console
+  output:
+    ansi:
+      enabled: Always  # Habilita a exibição de logs com cores no console para melhor visualização
+    SQL: debug  # Define o nível de log do SQL como debug, exibindo as consultas SQL geradas pela aplicação
+    type:
+      descriptor:
+        sql:
+          BasicBinder: trace  # Exibe os parâmetros que são inseridos nas consultas SQL para melhor rastreamento

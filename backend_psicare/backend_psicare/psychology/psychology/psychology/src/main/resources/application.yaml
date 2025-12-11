@@ -1,0 +1,52 @@
+server:
+  port: 8087  # Porta onde sua aplica??o vai rodar
+  servlet:
+    context-path: '/psicare/'  # Caminho base para todos os endpoints da API
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs  # Caminho onde a documenta﷿﷿o JSON ser﷿ exposta
+  swagger-ui:
+    path: /swagger-ui/index.html  # Interface visual da documenta﷿﷿o da API
+
+spring:
+  datasource:
+    # URL CORRETA DO MYSQL:
+    # Porta padr?o -> 3307
+    # Banco -> psicare
+    # Par?metros recomendados:
+    # - useSSL=false ? evita warning
+    # - allowPublicKeyRetrieval=true ? necess?rio em algumas instala??es do MySQL
+    # - serverTimezone=UTC ? evita problemas de timezone
+    url: jdbc:mysql://localhost:3307/psicare?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+
+    username: root  # Usu?rio do banco
+    password: 1234  # Senha do banco
+    driver-class-name: com.mysql.cj.jdbc.Driver  # Driver JDBC do MySQL
+
+    hikari:
+      maximum-pool-size: 10  # N?mero m?ximo de conex?es simult?neas
+
+  jpa:
+    open-in-view: false  # Evita LazyInitializationException e melhora a performance
+
+    hibernate:
+      ddl-auto: update  # Atualiza automaticamente o schema sem apagar dados
+      dialect: org.hibernate.dialect.MySQL8Dialect  # Dialeto correto do MySQL 8
+
+    properties:
+      hibernate:
+        show_sql: true   # Mostra SQL no console
+        format_sql: true # Formata o SQL para melhorar a leitura
+        jdbc:
+          lob.non_contextual_creation: true  # Evita erros com campos LOB
+  # Exibi??o de logs coloridos no console
+  output:
+    ansi:
+      enabled: Always  # Habilita a exibi??o de logs com cores no console para melhor visualiza??o
+    SQL: debug  # Define o n?vel de log do SQL como debug, exibindo as consultas SQL geradas pela aplica??o
+    type:
+      descriptor:
+        sql:
+          BasicBinder: trace  # Exibe os par?metros que s?o inseridos nas consultas SQL para melhor rastreamento
+
