@@ -211,12 +211,18 @@ function abrirModal(paciente = null) {
     document.getElementById("id-paciente").value = paciente?.id || "";
     document.getElementById("nome").value = paciente?.nome || "";
     document.getElementById("telefone").value = paciente?.telefone || "";
-    document.getElementById("queixa-principal").value = paciente?.queixaPrincipal || "";
-    document.getElementById("historico-familiar").value = paciente?.historicoFamiliar || "";
-    document.getElementById("observacoes-iniciais").value = paciente?.observacoesIniciais || "";
     document.getElementById("email").value = paciente?.email || "";
-    document.getElementById("status").value = paciente?.status || "ativo";
-    document.getElementById("anotacoes").value = paciente?.anotacoes || "";
+    
+    const statusVal = paciente?.status ? paciente.status.toLowerCase() : "ativo";
+    document.getElementById("status").value = statusVal;
+    
+    // --- CORREÇÃO AQUI: Preenchendo campos do Prontuário ---
+    const prontuario = paciente?.prontuario || {};
+    
+    document.getElementById("queixa-principal").value = prontuario.queixaPrincipal || "";
+    document.getElementById("historico-familiar").value = prontuario.historicoFamiliar || "";
+    document.getElementById("observacoes-iniciais").value = prontuario.observacoesIniciais || "";
+    document.getElementById("anotacoes").value = prontuario.anotacoesGerais || "";
     
     if (paciente?.dataNascimento) {
         seletorDataNascimento.setDate(paciente.dataNascimento);
@@ -266,14 +272,16 @@ function abrirModalPaciente(pacienteId) {
     document.getElementById('horario-paciente-modal').textContent = horarioTexto;
 
     document.getElementById('telefone-paciente-modal').textContent = paciente.telefone || '-';
-    document.getElementById('nascimento-paciente-modal').textContent = paciente.dataNascimento || '-';
+    document.getElementById('nascimento-paciente-modal').textContent = formatarDataExibicao(paciente.dataNascimento) || '-';
     
+    const prontuario = paciente.prontuario || {}
+
     document.getElementById('queixa-paciente-modal').textContent = paciente.queixaPrincipal || 'Não informado';
     document.getElementById('historico-paciente-modal').textContent = paciente.historicoFamiliar || 'Não informado';
     document.getElementById('observacoes-paciente-modal').textContent = paciente.observacoesIniciais || 'Não informado';
 
     const statusElement = document.getElementById('status-paciente-modal');
-    statusElement.value = paciente.status;
+    statusElement.value = paciente.status ? paciente.status.toLowerCase() : 'ativo';
 
     const anotacoesPaciente = anotacoes.filter(a => a.pacienteId === pacienteId);
     document.getElementById('total-sessoes-modal').textContent = `${anotacoesPaciente.length} sessões`;
@@ -316,6 +324,7 @@ function abrirModalPaciente(pacienteId) {
     }
 
     modalPaciente.style.display = "flex";
+    
 }
 function inicializarMascaraTelefone() {
     const inputTelefoneCadastro = document.getElementById('telefone'); // Este é o input do formulário de edição
@@ -719,7 +728,7 @@ document.addEventListener('DOMContentLoaded', inicializar);
 
 window.PsiCare = {
     pacientes: pacientes,
-    agendamentos: agendamentos,
+    agendamenthos: agendamentos,
     anotacoes: anotacoes,
     adicionarPaciente: () => abrirModal(),
     filtrarPacientes: filtrarPacientes,
@@ -727,3 +736,13 @@ window.PsiCare = {
     gerenciadorUsuario: gerenciadorUsuario,
     fazerLogout: fazerLogout,
 };
+
+function editarPacienteAtual() {
+    if (!pacienteSelecionado) return;
+
+    // 1. Fecha o modal de visualização
+    fecharModalPaciente();
+
+    // 2. Abre o modal de formulário (Edição) passando os dados
+    abrirModal(pacienteSelecionado);
+}

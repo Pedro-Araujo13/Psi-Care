@@ -6,6 +6,7 @@
   <title>PsiCare - Início</title>
   <link rel="stylesheet" href="css-inicio/inicio.css">
   <link rel="shortcut icon" href="img/icn.jpg" type="image/x-icon">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Sharp" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 </head>
 <body>
@@ -244,7 +245,14 @@
         <div class="acoes-paciente">
           <button class="botao-nova-anotacao" onclick="abrirModalNovaAnotacao()">+ Nova Anotação</button>
         </div>
-      </div>
+
+        <div class="acoes-extras" style="margin-top: 25px; border-top: 1px solid #e0e0e0; padding-top: 15px; display: flex; justify-content: flex-end;">
+            <button type="button" onclick="editarPacienteAtual()" class="botao-editar-modal" style="background-color: #4a90e2; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-weight: 500; font-size: 0.95rem; box-shadow: 0 2px 5px rgba(74, 144, 226, 0.2); transition: all 0.2s;">
+                <span class="material-icons-sharp" style="font-size: 18px;">edit</span>
+                Editar Paciente
+            </button>
+        </div>
+        </div>
     </div>
   </div>
 
