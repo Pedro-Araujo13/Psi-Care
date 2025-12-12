@@ -1,3 +1,6 @@
+// --- CONFIGURAÇÃO DA API ---
+const API_URL = "http://localhost:8087/psicare/paciente";
+
 class GerenciadorUsuario {
     constructor() {
         this.usuario = this.carregarUsuario() || this.criarUsuarioPadrao();
@@ -53,10 +56,12 @@ class GerenciadorUsuario {
 
 const gerenciadorUsuario = new GerenciadorUsuario();
 
-const CHAVE_ARMAZENAMENTO = "psicare_pacientes";
+// Variáveis Globais
 const CHAVE_AGENDAMENTOS = "psicare_agendamentos";
 const CHAVE_ANOTACOES = "psicare_anotacoes";
-let pacientes = JSON.parse(localStorage.getItem(CHAVE_ARMAZENAMENTO)) || [];
+
+// PACIENTES AGORA VÊM DO ARRAY VAZIO INICIALMENTE (SERÁ PREENCHIDO PELO JAVA)
+let pacientes = []; 
 let agendamentos = JSON.parse(localStorage.getItem(CHAVE_AGENDAMENTOS)) || [];
 let anotacoes = JSON.parse(localStorage.getItem(CHAVE_ANOTACOES)) || [];
 
@@ -92,6 +97,28 @@ const coresAvatar = [
 
 let pacienteSelecionado = null;
 let compareceuSessao = true;
+
+// --- FUNÇÕES DE COMUNICAÇÃO COM O BACKEND (JAVA) ---
+
+function carregarPacientesDoBanco() {
+    fetch(API_URL)
+        .then(response => response.json())
+        .then(data => {
+            pacientes = data; // Atualiza a lista com o que veio do banco
+            renderizarPacientes(pacientes);
+            atualizarContadores();
+        })
+        .catch(error => console.error("Erro ao carregar pacientes:", error));
+}
+
+function converterDataParaISO(dataBR) {
+    // Converte "15/05/1990" para "1990-05-15" (Formato que o Java aceita)
+    if (!dataBR) return null;
+    const [dia, mes, ano] = dataBR.split('/');
+    return `${ano}-${mes}-${dia}`;
+}
+
+// ---------------------------------------------------
 
 function navegarPara(pagina) {
     window.location.href = pagina;
@@ -148,25 +175,38 @@ function gerarCorAvatar(iniciais) {
 }
 
 function obterTextoStatus(status) {
+    // Java manda UPPERCASE, convertemos para lowercase para a chave
+    const statusKey = status ? status.toLowerCase() : 'ativo';
     const textos = { ativo: "Ativo", pausa: "Em pausa", inativo: "Inativo" };
-    return textos[status] || "Ativo";
+    return textos[statusKey] || "Ativo";
 }
 
 function formatarDataExibicao(dataString) {
     if (!dataString) return "-";
-    if (dataString.match(/^\d{2}\/\d{2}\/\d{4}$/)) {
-        return dataString;
+    // Se vier array do Java [ano, mes, dia]
+    if (Array.isArray(dataString)) {
+        return `${String(dataString[2]).padStart(2,'0')}/${String(dataString[1]).padStart(2,'0')}/${dataString[0]}`;
     }
-    try {
-        const [dia, mes, ano] = dataString.split('/');
-        return `${dia.padStart(2, '0')}/${mes.padStart(2, '0')}/${ano}`;
-    } catch {
-        return dataString;
+    // Se vier string "yyyy-mm-dd"
+    if (dataString.match(/^\d{4}-\d{2}-\d{2}$/)) {
+        const [ano, mes, dia] = dataString.split('-');
+        return `${dia}/${mes}/${ano}`;
     }
+    // Se já estiver certo
+    return dataString;
 }
 
 function converterParaData(dataString) {
     if (!dataString) return null;
+    // Tenta formato ISO vindo do Java (yyyy-mm-dd)
+    if (typeof dataString === 'string' && dataString.match(/^\d{4}-\d{2}-\d{2}$/)) {
+        const [ano, mes, dia] = dataString.split('-');
+        return new Date(ano, mes - 1, dia);
+    }
+    // Tenta formato Array vindo do Java [yyyy, mm, dd]
+    if (Array.isArray(dataString)) {
+        return new Date(dataString[0], dataString[1] - 1, dataString[2]);
+    }
     try {
         const [dia, mes, ano] = dataString.split('/');
         return new Date(ano, mes - 1, dia);
@@ -176,18 +216,33 @@ function converterParaData(dataString) {
 }
 
 function isSessaoHoje(paciente) {
-    if (paciente.status !== 'ativo' || !paciente.dataSessao) return false;
+    // Verifica agendamentos aninhados ou campo dataSessao antigo
+    let dataSessaoStr = paciente.dataSessao;
+    // Se usar a lista de agendamentos do backend:
+    if (paciente.agendamento && paciente.agendamento.length > 0) {
+        dataSessaoStr = paciente.agendamento[0].data; 
+    }
+
+    if (!paciente.status || paciente.status.toLowerCase() !== 'ativo' || !dataSessaoStr) return false;
+    
     const hoje = new Date();
-    const dataSessao = converterParaData(paciente.dataSessao);
+    const dataSessao = converterParaData(dataSessaoStr);
     if (!dataSessao) return false;
     return dataSessao.toDateString() === hoje.toDateString();
 }
 
 function isSessaoEstaSemana(paciente) {
-    if (paciente.status !== 'ativo' || !paciente.dataSessao) return false;
+    let dataSessaoStr = paciente.dataSessao;
+    if (paciente.agendamento && paciente.agendamento.length > 0) {
+        dataSessaoStr = paciente.agendamento[0].data; 
+    }
+
+    if (!paciente.status || paciente.status.toLowerCase() !== 'ativo' || !dataSessaoStr) return false;
+    
     const hoje = new Date();
-    const dataSessao = converterParaData(paciente.dataSessao);
+    const dataSessao = converterParaData(dataSessaoStr);
     if (!dataSessao) return false;
+    
     const inicioSemana = new Date(hoje);
     inicioSemana.setDate(hoje.getDate() - hoje.getDay());
     inicioSemana.setHours(0, 0, 0, 0);
@@ -198,7 +253,7 @@ function isSessaoEstaSemana(paciente) {
 }
 
 function salvarArmazenamento() {
-    localStorage.setItem(CHAVE_ARMAZENAMENTO, JSON.stringify(pacientes));
+    // Mantém salvando coisas locais, mas Pacientes agora é via API
     localStorage.setItem(CHAVE_AGENDAMENTOS, JSON.stringify(agendamentos));
     localStorage.setItem(CHAVE_ANOTACOES, JSON.stringify(anotacoes));
     atualizarContadores();
@@ -216,7 +271,7 @@ function abrirModal(paciente = null) {
     const statusVal = paciente?.status ? paciente.status.toLowerCase() : "ativo";
     document.getElementById("status").value = statusVal;
     
-    // --- CORREÇÃO AQUI: Preenchendo campos do Prontuário ---
+    // --- CORREÇÃO: Preenchendo campos do Prontuário ---
     const prontuario = paciente?.prontuario || {};
     
     document.getElementById("queixa-principal").value = prontuario.queixaPrincipal || "";
@@ -225,24 +280,34 @@ function abrirModal(paciente = null) {
     document.getElementById("anotacoes").value = prontuario.anotacoesGerais || "";
     
     if (paciente?.dataNascimento) {
-        seletorDataNascimento.setDate(paciente.dataNascimento);
+        // Se vier do Java pode ser array ou string ISO, o flatpickr geralmente entende, 
+        // mas é bom usar o formatador se necessário.
+        seletorDataNascimento.setDate(formatarDataExibicao(paciente.dataNascimento));
     } else {
         seletorDataNascimento.clear();
     }
     
-    if (paciente?.dataSessao) {
-        seletorDataSessao.setDate(paciente.dataSessao);
+    // Se for edição, tenta pegar o último agendamento
+    let dataAgendamento = "";
+    let horaAgendamento = "";
+    if (paciente?.agendamento && paciente.agendamento.length > 0) {
+        dataAgendamento = paciente.agendamento[0].data;
+        horaAgendamento = paciente.agendamento[0].hora;
+    }
+
+    if (dataAgendamento) {
+        seletorDataSessao.setDate(formatarDataExibicao(dataAgendamento));
     } else {
         seletorDataSessao.clear();
     }
     
-    if (paciente?.horarioSessao) {
-        seletorHorarioSessao.setDate(`1970-01-01 ${paciente.horarioSessao}`);
+    if (horaAgendamento) {
+        seletorHorarioSessao.setDate(`1970-01-01 ${horaAgendamento}`);
     } else {
         seletorHorarioSessao.clear();
     }
     
-    document.getElementById("frequencia-sessao").value = paciente?.frequenciaSessao || "";
+    document.getElementById("frequencia-sessao").value = paciente?.frequencia || "";
 }
 
 function fecharModal() {
@@ -258,7 +323,8 @@ function gerarId() {
 }
 
 function abrirModalPaciente(pacienteId) {
-    const paciente = pacientes.find(p => p.id === pacienteId);
+    // IMPORTANTE: pacienteId do Java é número, mas o atributo HTML é string
+    const paciente = pacientes.find(p => p.id == pacienteId);
     if (!paciente) return;
 
     pacienteSelecionado = paciente;
@@ -266,8 +332,9 @@ function abrirModalPaciente(pacienteId) {
     document.getElementById('nome-paciente-modal').textContent = paciente.nome;
     
     let horarioTexto = '-';
-    if (paciente.horarioSessao) {
-        horarioTexto = `${paciente.horarioSessao}`;
+    // Verifica lista de agendamentos
+    if (paciente.agendamento && paciente.agendamento.length > 0) {
+        horarioTexto = `${paciente.agendamento[0].hora}`;
     }
     document.getElementById('horario-paciente-modal').textContent = horarioTexto;
 
@@ -276,19 +343,23 @@ function abrirModalPaciente(pacienteId) {
     
     const prontuario = paciente.prontuario || {}
 
-    document.getElementById('queixa-paciente-modal').textContent = paciente.queixaPrincipal || 'Não informado';
-    document.getElementById('historico-paciente-modal').textContent = paciente.historicoFamiliar || 'Não informado';
-    document.getElementById('observacoes-paciente-modal').textContent = paciente.observacoesIniciais || 'Não informado';
+    document.getElementById('queixa-paciente-modal').textContent = prontuario.queixaPrincipal || 'Não informado';
+    document.getElementById('historico-paciente-modal').textContent = prontuario.historicoFamiliar || 'Não informado';
+    document.getElementById('observacoes-paciente-modal').textContent = prontuario.observacoesIniciais || 'Não informado';
 
     const statusElement = document.getElementById('status-paciente-modal');
     statusElement.value = paciente.status ? paciente.status.toLowerCase() : 'ativo';
 
-    const anotacoesPaciente = anotacoes.filter(a => a.pacienteId === pacienteId);
+    // Mantém lógica local de anotações (sessões passadas)
+    const anotacoesPaciente = anotacoes.filter(a => a.pacienteId == pacienteId);
     document.getElementById('total-sessoes-modal').textContent = `${anotacoesPaciente.length} sessões`;
     
-    const ultimaSessao = anotacoesPaciente.sort((a, b) => new Date(b.dataSessao.split('/').reverse().join('-')) - new Date(a.dataSessao.split('/').reverse().join('-')))[0];
-    document.getElementById('ultima-sessao-modal').textContent = ultimaSessao?.dataSessao || '-';
-    document.getElementById('proxima-sessao-modal').textContent = paciente.dataSessao || '-';
+    // Mostra Próxima Sessão baseada no agendamento do banco
+    let proximaSessao = '-';
+    if(paciente.agendamento && paciente.agendamento.length > 0){
+        proximaSessao = formatarDataExibicao(paciente.agendamento[0].data);
+    }
+    document.getElementById('proxima-sessao-modal').textContent = proximaSessao;
 
     const listaAnotacoes = document.getElementById('lista-anotacoes-sessao');
     listaAnotacoes.innerHTML = '';
@@ -296,6 +367,7 @@ function abrirModalPaciente(pacienteId) {
     if (anotacoesPaciente.length === 0) {
         listaAnotacoes.innerHTML = '<p class="sem-anotacoes">Nenhuma anotação de sessão registrada.</p>';
     } else {
+        // ... (código de renderização de anotações mantido igual)
         anotacoesPaciente.sort((a, b) => new Date(b.dataSessao.split('/').reverse().join('-')) - new Date(a.dataSessao.split('/').reverse().join('-'))).forEach(anotacao => {
             const anotacaoHTML = `
                 <div class="anotacao-sessao">
@@ -324,77 +396,82 @@ function abrirModalPaciente(pacienteId) {
     }
 
     modalPaciente.style.display = "flex";
-    
 }
-function inicializarMascaraTelefone() {
-    const inputTelefoneCadastro = document.getElementById('telefone'); // Este é o input do formulário de edição
 
+function inicializarMascaraTelefone() {
+    const inputTelefoneCadastro = document.getElementById('telefone'); 
     if (inputTelefoneCadastro) {
         inputTelefoneCadastro.addEventListener('input', (evento) => {
             let valor = evento.target.value;
-
-            // 1. Remove tudo que não for número
             valor = valor.replace(/\D/g, "");
-
-            // 2. Coloca os parênteses em volta dos dois primeiros dígitos (DDD)
             valor = valor.replace(/^(\d{2})(\d)/, "($1) $2");
-
-            // 3. Coloca o ponto depois do primeiro dígito do número (o nono dígito)
             valor = valor.replace(/(\d)(\d{4})/, "$1.$2");
-
-            // 4. Coloca o hífen antes dos últimos 4 dígitos
             valor = valor.replace(/(\d{4})(\d)/, "$1-$2");
-
-            // Atualiza o valor do input
             evento.target.value = valor;
         });
     }
 }
+
+// Em inicio.js
+
 function atualizarStatusPaciente() {
     if (!pacienteSelecionado) return;
     
-    const novoStatus = document.getElementById('status-paciente-modal').value;
+    const novoStatus = document.getElementById('status-paciente-modal').value.toUpperCase();
     
-    const pacienteIndex = pacientes.findIndex(p => p.id === pacienteSelecionado.id);
-    if (pacienteIndex !== -1) {
-        pacientes[pacienteIndex].status = novoStatus;
-        salvarArmazenamento();
-        
-        pacienteSelecionado.status = novoStatus;
-        renderizarPacientes(pacientes);
-    }
+    // Preparamos apenas o dado que mudou
+    const dadosParciais = {
+        status: novoStatus
+    };
+
+    // Chamada PATCH para a API
+    fetch(`${API_URL}/${pacienteSelecionado.id}`, {
+        method: 'PATCH',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(dadosParciais)
+    })
+    .then(response => {
+        if (response.ok) {
+            // Sucesso: Atualiza visualmente
+            pacienteSelecionado.status = novoStatus;
+            
+            // Atualiza a lista principal de pacientes (para refletir a cor na tabela)
+            const index = pacientes.findIndex(p => p.id === pacienteSelecionado.id);
+            if (index !== -1) {
+                pacientes[index].status = novoStatus;
+            }
+            
+            renderizarPacientes(pacientes);
+            alert("Status atualizado com sucesso!");
+        } else {
+            alert("Erro ao atualizar status via PATCH.");
+        }
+    })
+    .catch(erro => console.error("Erro na requisição PATCH:", erro));
 }
 
-function fecharModalPaciente() {
-    modalPaciente.style.display = "none";
-    pacienteSelecionado = null;
-}
+// ... (Funções de Anotação mantidas iguais: abrirModalNovaAnotacao, fecharModalNovaAnotacao, selecionarComparecimento, salvarAnotacao, anotacoesPaciente) ...
+// Para economizar espaço, mantenha as funções de anotação como estavam, pois elas usam localStorage e não afetam o erro do backend.
+// Certifique-se apenas que 'salvarAnotacao' use 'abrirModalPaciente(pacienteId)' com ID correto.
 
 function abrirModalNovaAnotacao() {
     if (!pacienteSelecionado) return;
-    
     document.getElementById('id-paciente-anotacao').value = pacienteSelecionado.id;
     seletorDataSessaoAnotacao.clear();
-    
     const botoesComparecimento = document.querySelectorAll('.botao-comparecimento');
     botoesComparecimento.forEach(botao => botao.classList.remove('ativo'));
     botoesComparecimento[0].classList.add('ativo');
     compareceuSessao = true;
-    
     document.getElementById('observacoes-sessao').value = '';
     document.getElementById('humor-sessao').value = '';
     document.getElementById('proximos-passos-sessao').value = '';
-    
     modalNovaAnotacao.style.display = "flex";
 }
-
-function fecharModalNovaAnotacao() {
-    modalNovaAnotacao.style.display = "none";
-}
-
+function fecharModalNovaAnotacao() { modalNovaAnotacao.style.display = "none"; }
 function selecionarComparecimento(compareceu) {
     compareceuSessao = compareceu;
-    
     const botoesComparecimento = document.querySelectorAll('.botao-comparecimento');
     botoesComparecimento.forEach(botao => {
         if (botao.getAttribute('data-compareceu') === compareceu.toString()) {
@@ -404,22 +481,14 @@ function selecionarComparecimento(compareceu) {
         }
     });
 }
-
 function salvarAnotacao(e) {
     e.preventDefault();
-
     const pacienteId = document.getElementById('id-paciente-anotacao').value;
-    const dataSessao = seletorDataSessaoAnotacao.selectedDates[0] ? 
-        seletorDataSessaoAnotacao.formatDate(seletorDataSessaoAnotacao.selectedDates[0], 'd/m/Y') : "";
+    const dataSessao = seletorDataSessaoAnotacao.selectedDates[0] ? seletorDataSessaoAnotacao.formatDate(seletorDataSessaoAnotacao.selectedDates[0], 'd/m/Y') : "";
     const observacoes = document.getElementById('observacoes-sessao').value.trim();
     const humor = document.getElementById('humor-sessao').value.trim();
     const proximosPassos = document.getElementById('proximos-passos-sessao').value.trim();
-
-    if (!dataSessao) {
-        alert('A data da sessão é obrigatória.');
-        return;
-    }
-
+    if (!dataSessao) { alert('A data da sessão é obrigatória.'); return; }
     const novaAnotacao = {
         id: Date.now().toString(),
         pacienteId: pacienteId,
@@ -430,79 +499,82 @@ function salvarAnotacao(e) {
         proximosPassos: proximosPassos,
         dataCriacao: new Date().toISOString()
     };
-
     anotacoes.push(novaAnotacao);
     salvarArmazenamento();
-    
     fecharModalNovaAnotacao();
     abrirModalPaciente(pacienteId);
 }
-
 function anotacoesPaciente(id){
-    const paciente = pacientes.find(p => p.id === id);
+    const paciente = pacientes.find(p => p.id == id);
     if (!paciente) return alert("Paciente não encontrado.");
-
     const conteudoAnotacoes = document.getElementById("conteudo-anotacoes");
-    
+    const prontuario = paciente.prontuario || {};
     let conteudoHTML = `
         <p><strong>Nome:</strong> ${paciente.nome}</p>
-        <p><strong>Data de Nascimento:</strong> ${paciente.dataNascimento || "Não informado"}</p>
+        <p><strong>Data de Nascimento:</strong> ${formatarDataExibicao(paciente.dataNascimento) || "Não informado"}</p>
         <p><strong>Telefone:</strong> ${paciente.telefone || "Não informado"}</p>
         <p><strong>Email:</strong> ${paciente.email || "Não informado"}</p>
-        <p><strong>Queixa Principal:</strong> ${paciente.queixaPrincipal || "Não informado"}</p>
-        <p><strong>Histórico Familiar:</strong> ${paciente.historicoFamiliar || "Não informado"}</p>
-        <p><strong>Observações Iniciais:</strong> ${paciente.observacoesIniciais || "Não informado"}</p>
-        <p><strong>Próxima Sessão:</strong> ${paciente.dataSessao ? `${paciente.dataSessao} ${paciente.horarioSessao ? 'às ' + paciente.horarioSessao : ''}` : "Não agendada"}</p>
-        <p><strong>Frequência:</strong> ${paciente.frequenciaSessao || "Não definida"}</p>
+        <p><strong>Queixa Principal:</strong> ${prontuario.queixaPrincipal || "Não informado"}</p>
+        <p><strong>Histórico Familiar:</strong> ${prontuario.historicoFamiliar || "Não informado"}</p>
+        <p><strong>Observações Iniciais:</strong> ${prontuario.observacoesIniciais || "Não informado"}</p>
+        <p><strong>Frequência:</strong> ${paciente.frequencia || "Não definida"}</p>
         <p><strong>Status:</strong> ${obterTextoStatus(paciente.status)}</p>
-        <p><strong>Anotações Gerais:</strong> ${paciente.anotacoes?.trim() || "Sem anotações."}</p>
+        <p><strong>Anotações Gerais:</strong> ${prontuario.anotacoesGerais?.trim() || "Sem anotações."}</p>
     `;
-    
     conteudoAnotacoes.innerHTML = conteudoHTML;
     modalAnotacoes.style.display = "flex";
 }
 
+// --------------------------------------------------------------------------------
+
 function deletarPaciente(pacienteId, evento) {
     evento.stopPropagation();
     if (confirm('Tem certeza que deseja excluir este paciente?')) {
-        const indice = pacientes.findIndex(p => p.id == pacienteId);
-        if (indice !== -1) {
-            pacientes.splice(indice, 1);
-            anotacoes = anotacoes.filter(a => a.pacienteId !== pacienteId);
-            agendamentos = agendamentos.filter(a => a.pacienteId !== pacienteId);
-            salvarArmazenamento();
-            renderizarPacientes(pacientes);
-        }
+        // CHAMA API DELETE
+        fetch(`${API_URL}/${pacienteId}`, {
+            method: 'DELETE'
+        })
+        .then(response => {
+            if(response.ok){
+                alert("Paciente excluído com sucesso.");
+                carregarPacientesDoBanco(); // Recarrega a lista
+            } else {
+                alert("Erro ao excluir paciente.");
+            }
+        })
+        .catch(err => console.error("Erro delete:", err));
     }
 }
 
 function criarHTMLPaciente(paciente) {
-    const corAvatar = gerarCorAvatar(paciente.iniciais);
+    // Tratamento para garantir que iniciais existam
+    const iniciais = paciente.nome ? gerarIniciais(paciente.nome) : "??";
+    const corAvatar = gerarCorAvatar(iniciais);
     const textoStatus = obterTextoStatus(paciente.status);
     
     let horarioTexto = "-";
-    if (paciente.dataSessao && paciente.horarioSessao) {
-        horarioTexto = `${formatarDataExibicao(paciente.dataSessao)} - ${paciente.horarioSessao}`;
-    } else if (paciente.horario) {
-        horarioTexto = paciente.horario;
+    // Tenta pegar do agendamento vindo do banco
+    if (paciente.agendamento && paciente.agendamento.length > 0) {
+        const ag = paciente.agendamento[0];
+        horarioTexto = `${formatarDataExibicao(ag.data)} - ${ag.hora}`;
     }
     
     return `
         <li class="item-paciente" data-id="${paciente.id}">
-            <div class="avatar-paciente" style="background: ${corAvatar}">${paciente.iniciais}</div>
+            <div class="avatar-paciente" style="background: ${corAvatar}">${iniciais}</div>
             <div class="info-paciente">
                 <div class="nome-paciente">${paciente.nome}</div>
-                <div class="detalhes-paciente">${paciente.telefone}<br>${horarioTexto}</div>
+                <div class="detalhes-paciente">${paciente.telefone || ''}<br>${horarioTexto}</div>
             </div>
-            <div class="status-paciente status-${paciente.status}">${textoStatus}</div>
-            <button class="botao-deletar" onclick="deletarPaciente('${paciente.id}', event)">×</button>
+            <div class="status-paciente status-${paciente.status ? paciente.status.toLowerCase() : 'ativo'}">${textoStatus}</div>
+            <button class="botao-deletar" onclick="deletarPaciente(${paciente.id}, event)">×</button>
         </li>
     `;
 }
 
 function renderizarPacientes(pacientesParaRenderizar) {
     listaPacientes.innerHTML = '';
-    if (pacientesParaRenderizar.length === 0) {
+    if (!pacientesParaRenderizar || pacientesParaRenderizar.length === 0) {
         listaPacientes.innerHTML = '<li class="nenhum-paciente">Nenhum paciente encontrado</li>';
         return;
     }
@@ -518,14 +590,17 @@ function filtrarPacientes() {
     const pacientesFiltrados = pacientes.filter(paciente => {
         const nome = paciente.nome || '';
         const nomeCorresponde = nome.toLowerCase().includes(termoPesquisa);
-        const statusCorresponde = statusSelecionado === 'todos' || paciente.status === statusSelecionado;
+        const statusPaciente = paciente.status ? paciente.status.toLowerCase() : 'ativo';
+        const statusCorresponde = statusSelecionado === 'todos' || statusPaciente === statusSelecionado;
         return nomeCorresponde && statusCorresponde;
     });
     renderizarPacientes(pacientesFiltrados);
 }
 
 function atualizarContadores() {
-    const countAtivos = pacientes.filter(p => p.status === 'ativo').length;
+    // Filtro simples baseados nos dados carregados
+    if(!pacientes) return;
+    const countAtivos = pacientes.filter(p => p.status && p.status.toUpperCase() === 'ATIVO').length;
     pacientesAtivos.textContent = countAtivos;
     
     const countHoje = pacientes.filter(isSessaoHoje).length;
@@ -549,7 +624,6 @@ function inicializarNavegacao() {
     document.querySelectorAll('.barralateral li').forEach(item => {
         item.addEventListener('click', function() {
             const texto = this.textContent.trim();
-            
             if (texto.includes('Início')) {
                 console.log('Já está no Início');
             } else if (texto.includes('Agenda')) {
@@ -565,13 +639,11 @@ function inicializarNavegacao() {
         avatarUsuario.addEventListener('click', function() {
             menuUsuario.style.display = menuUsuario.style.display === 'flex' ? 'none' : 'flex';
         });
-        
         document.addEventListener('click', function(e) {
             if (!avatarUsuario.contains(e.target) && !menuUsuario.contains(e.target)) {
                 menuUsuario.style.display = 'none';
             }
         });
-        
         document.querySelectorAll('.menu_usuario p').forEach(item => {
             item.addEventListener('click', function() {
                 const acao = this.textContent.trim();
@@ -586,95 +658,75 @@ function inicializarNavegacao() {
     }
 }
 
+// Helper para formatar data para o input (não é mais tão usado pois o flatpickr gerencia, mas mantido por segurança)
 function formatarDataParaAgenda(dataString) {
     if (!dataString) return '';
     const [dia, mes, ano] = dataString.split('/');
     return `${ano}-${mes.padStart(2, '0')}-${dia.padStart(2, '0')}`;
 }
 
-function criarAgendamentoDoPaciente(paciente) {
-    if (paciente.dataSessao && paciente.horarioSessao) {
-        const dataAgenda = formatarDataParaAgenda(paciente.dataSessao);
-        
-        const agendamentoExistente = agendamentos.find(a => 
-            a.pacienteId === paciente.id && 
-            a.data === dataAgenda && 
-            a.hora === paciente.horarioSessao
-        );
-
-        if (!agendamentoExistente) {
-            const novoAgendamento = {
-                id: Date.now(),
-                pacienteId: paciente.id,
-                nome: paciente.nome,
-                data: dataAgenda,
-                hora: paciente.horarioSessao,
-                telefone: paciente.telefone
-            };
-            
-            agendamentos.push(novoAgendamento);
-            return true;
-        }
-    }
-    return false;
-}
-
-function atualizarAgendamentosExistentes(paciente) {
-    // Remove agendamentos antigos do paciente
-    agendamentos = agendamentos.filter(a => a.pacienteId !== paciente.id);
-    
-    // Cria novo agendamento se houver data e horário
-    if (paciente.dataSessao && paciente.horarioSessao) {
-        criarAgendamentoDoPaciente(paciente);
-    }
-}
+// --- LÓGICA DE SUBMISSÃO (CRIAR E EDITAR) VIA API ---
 
 formulario.onsubmit = (e) => {
     e.preventDefault();
 
     const nomePaciente = document.getElementById("nome").value.trim();
-    
-    const dados = {
-        id: document.getElementById("id-paciente").value || gerarId(),
+    if (!nomePaciente) return alert("O nome é obrigatório.");
+
+    const dadosParaEnviar = {
         nome: nomePaciente,
-        dataNascimento: seletorDataNascimento.selectedDates[0] ? 
-            seletorDataNascimento.formatDate(seletorDataNascimento.selectedDates[0], 'd/m/Y') : "",
         telefone: document.getElementById("telefone").value.trim(),
+        email: document.getElementById("email").value.trim(),
+        // Converte data pt-BR para ISO (yyyy-mm-dd)
+        dataNascimento: converterDataParaISO(document.getElementById("data-nascimento").value),
+        status: document.getElementById("status").value.toUpperCase(),
+
+        // Prontuário
         queixaPrincipal: document.getElementById("queixa-principal").value.trim(),
         historicoFamiliar: document.getElementById("historico-familiar").value.trim(),
         observacoesIniciais: document.getElementById("observacoes-iniciais").value.trim(),
-        email: document.getElementById("email").value.trim(),
-        dataSessao: seletorDataSessao.selectedDates[0] ? 
-            seletorDataSessao.formatDate(seletorDataSessao.selectedDates[0], 'd/m/Y') : "",
-        horarioSessao: seletorHorarioSessao.selectedDates[0] ? 
-            seletorHorarioSessao.formatDate(seletorHorarioSessao.selectedDates[0], 'H:i') : "",
-        frequenciaSessao: document.getElementById("frequencia-sessao").value,
-        status: document.getElementById("status").value,
-        iniciais: gerarIniciais(nomePaciente),
-        anotacoes: document.getElementById("anotacoes").value.trim(),
+        anotacoesGerais: document.getElementById("anotacoes").value.trim(),
+
+        // Agendamento (Envia null se vazio)
+        dataSessao: document.getElementById("data-sessao").value ? converterDataParaISO(document.getElementById("data-sessao").value) : null,
+        horarioSessao: document.getElementById("horario-sessao").value ? document.getElementById("horario-sessao").value + ":00" : null,
+        frequencia: document.getElementById("frequencia-sessao").value ? document.getElementById("frequencia-sessao").value.toUpperCase() : null
     };
 
-    if (!dados.nome) return alert("O nome é obrigatório.");
+    const idPaciente = document.getElementById("id-paciente").value;
 
-    const existe = pacientes.some(p => p.id === dados.id);
-    if (existe) {
-        pacientes = pacientes.map(p => (p.id === dados.id ? dados : p));
-        // Atualiza agendamentos quando edita paciente
-        atualizarAgendamentosExistentes(dados);
-    } else {
-        pacientes.unshift(dados);
-        // Cria agendamento apenas para novos pacientes com sessão agendada
-        criarAgendamentoDoPaciente(dados);
+    let metodo = 'POST';
+    let urlEnvio = API_URL;
+
+    if (idPaciente) {
+        metodo = 'PUT';
+        urlEnvio = `${API_URL}/${idPaciente}`;
     }
 
-    salvarArmazenamento();
-    fecharModal();
-    renderizarPacientes(pacientes);
+    fetch(urlEnvio, {
+        method: metodo,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(dadosParaEnviar)
+    })
+    .then(response => {
+        if (!response.ok) return response.text().then(t => { throw new Error(t) });
+        return response.json();
+    })
+    .then(data => {
+        alert(idPaciente ? "Atualizado com sucesso!" : "Cadastrado com sucesso!");
+        fecharModal();
+        carregarPacientesDoBanco(); // Recarrega tabela
+    })
+    .catch(error => {
+        console.error("Erro:", error);
+        alert("Erro ao salvar: " + error.message);
+    });
 };
 
 formularioAnotacao.onsubmit = salvarAnotacao;
 
 function inicializar() {
+    // ... (Código de redirecionamento da agenda mantido)
     const novoAgendamento = localStorage.getItem('psicare_novo_agendamento');
     if (novoAgendamento) {
         const agendamento = JSON.parse(novoAgendamento);
@@ -695,9 +747,10 @@ function inicializar() {
     inicializarSeletoresData();
     inicializarMascaraTelefone();
     gerenciadorUsuario.atualizarAvatarCabecalho();
-    salvarArmazenamento();
-    renderizarPacientes(pacientes);
-    atualizarContadores();
+    
+    // SUBSTITUI O CARREGAMENTO LOCAL PELO BANCO
+    // renderizarPacientes(pacientes); -> removido
+    carregarPacientesDoBanco(); 
     
     filtroStatus.addEventListener('change', filtrarPacientes);
     pesquisaInput.addEventListener('input', filtrarPacientes);
@@ -739,10 +792,6 @@ window.PsiCare = {
 
 function editarPacienteAtual() {
     if (!pacienteSelecionado) return;
-
-    // 1. Fecha o modal de visualização
     fecharModalPaciente();
-
-    // 2. Abre o modal de formulário (Edição) passando os dados
     abrirModal(pacienteSelecionado);
 }

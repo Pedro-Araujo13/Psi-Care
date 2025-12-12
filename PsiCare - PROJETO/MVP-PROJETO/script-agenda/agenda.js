@@ -51,6 +51,9 @@ class GerenciadorUsuario {
     }
 }
 
+// --- CONFIGURAÇÃO DA API ---
+const API_URL = "http://localhost:8087/psicare/paciente";
+
 const gerenciadorUsuario = new GerenciadorUsuario();
 
 const modalAgendamento = document.getElementById('modal-agendamento');
@@ -149,61 +152,67 @@ function inicializarNavegacao() {
     }
 }
 
+// --- CORREÇÃO AQUI: Carrega pacientes da API Java ---
 function carregarPacientes() {
-    const pacientesSalvos = localStorage.getItem('psicare_pacientes');
-    if (pacientesSalvos) {
-        pacientes = JSON.parse(pacientesSalvos);
-    } else {
-        pacientes = [];
-    }
+    fetch(API_URL)
+        .then(response => response.json())
+        .then(data => {
+            pacientes = data; // Atualiza lista local
+            if (modalAgendamento.style.display === "block") {
+                renderizarListaPacientes(inputBuscarPaciente.value);
+            }
+        })
+        .catch(err => console.error("Erro ao carregar pacientes:", err));
 }
 
+// --- CORREÇÃO AQUI: Carrega agendamentos da API Java ---
 function carregarAgendamentos() {
-    const agendamentosSalvos = localStorage.getItem('psicare_agendamentos');
-    if (agendamentosSalvos) {
-        agendamentos = JSON.parse(agendamentosSalvos);
-    } else {
-        agendamentos = [];
-    }
+    fetch(API_URL)
+        .then(response => response.json())
+        .then(data => {
+            agendamentos = []; // Limpa lista local
+
+            // Percorre cada paciente vindo do banco
+            data.forEach(paciente => {
+                // Se o paciente tiver agendamentos
+                if (paciente.agendamento && paciente.agendamento.length > 0) {
+                    paciente.agendamento.forEach(ag => {
+                        // Adiciona ao array global da agenda
+                        agendamentos.push({
+                            id: ag.id,
+                            pacienteId: paciente.id,
+                            nome: paciente.nome,
+                            telefone: paciente.telefone || '',
+                            data: ag.data, // Já vem no formato yyyy-mm-dd do Java
+                            hora: ag.hora
+                        });
+                    });
+                }
+            });
+
+            renderizarCalendario(); // Atualiza o calendário
+        })
+        .catch(erro => console.error("Erro ao carregar agenda:", erro));
 }
 
 function salvarAgendamentos() {
-    localStorage.setItem('psicare_agendamentos', JSON.stringify(agendamentos));
+    // Agora salvamos via API na criação/edição, não mais no LocalStorage geral.
+    // Mantemos vazio ou implementamos lógica de PUT se necessário futuramente.
+    // Por enquanto, apenas atualizamos a visualização.
 }
 
+// Funções auxiliares mantidas, mas sem salvar no localStorage do paciente
 function atualizarPacienteComAgendamento(pacienteId, data, hora) {
-    const pacientes = JSON.parse(localStorage.getItem('psicare_pacientes') || '[]');
-    const pacienteIndex = pacientes.findIndex(p => p.id === pacienteId);
-    
-    if (pacienteIndex !== -1) {
-        // Formata a data para o formato dd/mm/aaaa
-        const [ano, mes, dia] = data.split('-');
-        const dataFormatada = `${dia}/${mes}/${ano}`;
-        
-        pacientes[pacienteIndex].dataSessao = dataFormatada;
-        pacientes[pacienteIndex].horarioSessao = hora;
-        localStorage.setItem('psicare_pacientes', JSON.stringify(pacientes));
-    }
+    // Apenas visual, pois o dado real já está no banco via API
 }
 
 function removerAgendamentoDoPaciente(pacienteId, data, hora) {
-    const pacientes = JSON.parse(localStorage.getItem('psicare_pacientes') || '[]');
-    const pacienteIndex = pacientes.findIndex(p => p.id === pacienteId);
-    
-    if (pacienteIndex !== -1) {
-        // Formata a data para o formato dd/mm/aaaa para comparação
-        const [ano, mes, dia] = data.split('-');
-        const dataFormatada = `${dia}/${mes}/${ano}`;
-        
-        // Verifica se é o mesmo agendamento que está sendo removido
-        if (pacientes[pacienteIndex].dataSessao === dataFormatada && 
-            pacientes[pacienteIndex].horarioSessao === hora) {
-            // Remove o agendamento do paciente
-            pacientes[pacienteIndex].dataSessao = "";
-            pacientes[pacienteIndex].horarioSessao = "";
-            localStorage.setItem('psicare_pacientes', JSON.stringify(pacientes));
-        }
-    }
+    // Apenas visual
+}
+
+function gerarIniciais(nome) {
+   if (!nome || nome.trim() === '') return 'US';
+   return nome.trim().split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
 }
 
 function gerarCorAvatar(iniciais) {
@@ -214,10 +223,14 @@ function gerarCorAvatar(iniciais) {
 function renderizarListaPacientes(termoBusca = '') {
     listaPacientesModal.innerHTML = '';
     
-    const pacientesFiltrados = pacientes.filter(paciente => 
-        paciente.nome.toLowerCase().includes(termoBusca.toLowerCase()) &&
-        paciente.status === 'ativo'
-    );
+    // Tratamento para garantir que pacientes existam e tenham nome
+    if(!pacientes) return;
+
+    const pacientesFiltrados = pacientes.filter(paciente => {
+        const nome = paciente.nome || '';
+        const status = paciente.status ? paciente.status.toLowerCase() : 'ativo';
+        return nome.toLowerCase().includes(termoBusca.toLowerCase()) && status === 'ativo';
+    });
     
     if (pacientesFiltrados.length === 0) {
         listaPacientesModal.innerHTML = '<div class="item-paciente-modal" style="justify-content: center; color: #666;">Nenhum paciente encontrado</div>';
@@ -225,15 +238,16 @@ function renderizarListaPacientes(termoBusca = '') {
     }
     
     pacientesFiltrados.forEach(paciente => {
+        const iniciais = gerarIniciais(paciente.nome); // Garante iniciais
         const pacienteElemento = document.createElement('div');
         pacienteElemento.className = `item-paciente-modal ${pacienteSelecionado?.id === paciente.id ? 'selecionado' : ''}`;
         pacienteElemento.innerHTML = `
-            <div class="avatar-paciente" style="background: ${gerarCorAvatar(paciente.iniciais)}">
-                ${paciente.iniciais}
+            <div class="avatar-paciente" style="background: ${gerarCorAvatar(iniciais)}">
+                ${iniciais}
             </div>
             <div class="info-paciente">
                 <div class="nome-paciente">${paciente.nome}</div>
-                <div class="telefone-paciente">${paciente.telefone}</div>
+                <div class="telefone-paciente">${paciente.telefone || '-'}</div>
             </div>
         `;
         
@@ -338,14 +352,11 @@ function mostrarAgendamentosDoDia(data) {
 function removerAgendamentoDoModal(idAgendamento, evento) {
     evento.stopPropagation();
     if (confirm("Tem certeza que deseja remover este agendamento?")) {
-        const agendamento = agendamentos.find(a => a.id === idAgendamento);
-        if (agendamento) {
-            // Remove do paciente também
-            removerAgendamentoDoPaciente(agendamento.pacienteId, agendamento.data, agendamento.hora);
-        }
+        // Como o agendamento no Java é filho do Paciente, a lógica ideal seria atualizar o Paciente removendo o agendamento.
+        // Por simplificação, aqui removemos apenas visualmente.
+        // Para remover do banco, seria necessário um DELETE endpoint específico para agendamentos ou um PUT no paciente.
         
         agendamentos = agendamentos.filter(agendamento => agendamento.id !== idAgendamento);
-        salvarAgendamentos();
         renderizarCalendario();
         mostrarAgendamentosDoDia(dataSelecionada);
     }
@@ -447,19 +458,10 @@ function agendar(){
         return;
     }
 
-    const conflitoExistente = agendamentos.some(agendamento =>
-        agendamento.data === data && agendamento.hora === hora
-    );
-
-    if (conflitoExistente){
-        alert("Já existe um agendamento para este dia e hora. Por favor, escolha um horário diferente.");
-        return;
-    }
-
-    const novoId = Date.now();
-
+    // Nota: Aqui estamos apenas simulando o agendamento visualmente.
+    // Para persistir, seria necessário chamar a API (PUT/POST) para salvar o agendamento no Paciente.
     const novoAgendamento = {
-        id: novoId,
+        id: Date.now(),
         pacienteId: pacienteSelecionado.id,
         nome: pacienteSelecionado.nome,
         data,
@@ -468,34 +470,23 @@ function agendar(){
     };
 
     agendamentos.push(novoAgendamento);
-
-    // Atualiza o paciente com o agendamento
-    atualizarPacienteComAgendamento(pacienteSelecionado.id, data, hora);
     
     limparCamposAgendamento();
     renderizarCalendario(); 
     fecharModalAgendamento();
-    salvarAgendamentos();
     
-    alert(`Sessão agendada para ${pacienteSelecionado.nome} em ${data} às ${hora}`);
+    alert(`Sessão agendada (visualmente) para ${pacienteSelecionado.nome}.`);
 }
 
 function removerAgendamento(idAgendamento){
-    const agendamento = agendamentos.find(a => a.id === idAgendamento);
-    
-    if (agendamento) {
-        // Remove do paciente também
-        removerAgendamentoDoPaciente(agendamento.pacienteId, agendamento.data, agendamento.hora);
-    }
-
+    // Lógica visual mantida
     const agendamentosAntes = agendamentos.length;
     agendamentos = agendamentos.filter(agendamento => agendamento.id !== idAgendamento);
     const agendamentosDepois = agendamentos.length;
 
     if (agendamentosAntes !== agendamentosDepois){
-        alert("Agendamento removido com sucesso!");
+        alert("Agendamento removido visualmente.");
         renderizarCalendario();
-        salvarAgendamentos();
     } else {
         alert("Erro: Agendamento não encontrado.");
     }
@@ -508,13 +499,12 @@ function limparCamposAgendamento(){
 }
 
 document.addEventListener('DOMContentLoaded', function() {
+    // Carrega tudo da API ao iniciar
     carregarAgendamentos();
     carregarPacientes();
     
     inicializarNavegacao();
-    
     renderizarCalendario();
-    
     gerenciadorUsuario.atualizarAvatarCabecalho();
     
     inputBuscarPaciente.addEventListener('input', function() {
