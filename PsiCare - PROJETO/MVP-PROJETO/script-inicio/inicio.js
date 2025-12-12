@@ -795,3 +795,12 @@ function editarPacienteAtual() {
     fecharModalPaciente();
     abrirModal(pacienteSelecionado);
 }
+
+function fecharModalPaciente() {
+    const modalPaciente = document.getElementById("modal-paciente");
+    if (modalPaciente) {
+        modalPaciente.style.display = "none";
+    }
+    // Limpa a seleção ao fechar para evitar erros na reabertura
+    pacienteSelecionado = null; 
+}
