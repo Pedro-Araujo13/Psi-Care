@@ -25,19 +25,23 @@ public class PacienteService {
 
     @Transactional
     public PacienteModel cadastrarCompleto(CadastroRecordDto dto){
-        //Criar e Salvar
+        // Criar e Salvar Paciente
         PacienteModel pacienteModel = new PacienteModel();
         pacienteModel.setNome(dto.nome());
         pacienteModel.setTelefone(dto.telefone());
         pacienteModel.setEmail(dto.email());
         pacienteModel.setDataNascimento(dto.dataNascimento());
-        pacienteModel.setStatus(StatusPaciente.valueOf(String.valueOf(dto.status())));
+
+        // CORREÇÃO: Use o enum diretamente. O DTO já tipa como StatusPaciente.
+        // Se dto.status() for null, o banco pode reclamar se a coluna for NotNull,
+        // mas evita o erro de conversão de string "null".
+        pacienteModel.setStatus(dto.status());
+
         pacienteModel.setFrequencia(dto.frequencia());
 
-        //gerar ID do paciente
-        pacienteModel = pacienteRepository.save(pacienteModel);
+        pacienteModel = pacienteRepository.save(pacienteModel); // Salva para gerar o ID
 
-        // Criar e Salvar o projeto
+        // Criar e Salvar o Prontuário
         ProntuarioModel prontuarioModel = new ProntuarioModel();
         prontuarioModel.setQueixaPrincipal(dto.queixaPrincipal());
         prontuarioModel.setHistoricoFamiliar(dto.historicoFamiliar());
@@ -47,11 +51,20 @@ public class PacienteService {
 
         prontuarioRepository.save(prontuarioModel);
 
-        // criar agendamento se o usuário tiver preenchido data e hora
+        // CORREÇÃO: Lógica de Agendamento
         if (dto.dataSessao() != null && dto.horarioSessao() != null){
             AgendamentoModel agendamentoModel = new AgendamentoModel();
             agendamentoModel.setData(dto.dataSessao());
+            agendamentoModel.setHora(dto.horarioSessao()); // Faltava setar a hora
+
+            // Faltava definir o status inicial (se necessário, ex: PENDENTE ou CONFIRMADO)
+            // agendamentoModel.setStatus(Agendamento.CONFIRMADO);
+
+            agendamentoModel.setPaciente(pacienteModel); // Faltava vincular ao paciente
+
+            agendamentoRepository.save(agendamentoModel); // Faltava salvar no banco!
         }
+
         return pacienteModel;
     }
     // 2- Listar Todos

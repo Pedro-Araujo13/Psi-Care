@@ -27,7 +27,6 @@ public class PacienteModel {
     private StatusPaciente status;
     private FrequenciaSessao frequencia;
 
-    @CreationTimestamp
     private LocalDate dataNascimento;
 
     @CreationTimestamp
