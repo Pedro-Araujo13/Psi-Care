@@ -18,7 +18,7 @@ spring:
     # - useSSL=false ? evita warning
     # - allowPublicKeyRetrieval=true ? necess?rio em algumas instala??es do MySQL
     # - serverTimezone=UTC ? evita problemas de timezone
-    url: jdbc:mysql://localhost:3307/psicare?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+    url: jdbc:mysql://localhost:3306/psicare?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
 
     username: root  # Usu?rio do banco
     password: 1234  # Senha do banco
